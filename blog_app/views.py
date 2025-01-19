@@ -145,18 +145,16 @@ class AddPostView(LoginRequiredMixin, CreateView):
     form_class = PostForm
     template_name = 'blog_app/add_post.html'
 
+    success_url = reverse_lazy('blog')
 
     def form_valid(self, form):
         # Сохраняем форму с указанием автора
         self.object = form.save(commit=True, author=self.request.user)
         # Добавляем сообщение об успехе
-        return JsonResponse({
-            'success': True,
-            'message': 'Пост успешно создан',
-            'redirect_url': reverse('blog')
-        })
+        return super().form_valid(form)
 
     def form_invalid(self, form):
+        print(form.errors)
         return JsonResponse({
             'success': False,
             'message': 'Ошибка в форме',
@@ -172,16 +170,13 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog_app/add_post.html'
+    success_url = reverse_lazy('blog')
     def get_object(self, queryset=None):
         # Получаем объект поста по slug
         return get_object_or_404(Post, slug=self.kwargs['post_slug'])
     def form_valid(self, form):
         self.object = form.save()
-        return JsonResponse({
-            'success': True,
-            'message': 'Пост успешно обновлен',
-            'redirect_url': reverse('post_by_slug', kwargs={'slug': self.object.slug})
-        })
+        return super().form_valid(form)
 
     def form_invalid(self, form):
         return JsonResponse({
